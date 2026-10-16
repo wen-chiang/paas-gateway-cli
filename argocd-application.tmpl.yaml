@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${PGATE_APP_NAME}
+spec:
+  destination:
+    name: ${PGATE_CLUSTER}
+    namespace: ${PGATE_NAMESPACE}
+  source:
+    path: ${PGATE_CHART_PATH}
+    repoURL: ${PGATE_REPO_URL}
+    targetRevision: ${PGATE_BRANCH}
+    helm:
+      valueFiles:
+        - ${PGATE_HELM_VALUES}
+  project: ${PGATE_PROJECT}
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true

@@ -1,0 +1,17 @@
+# .pgate.yaml — per-repository pgate configuration
+# Commit this file to the ROOT of your application repository.
+# pgate reads it automatically; no changes needed in the global config.yaml.
+#
+# This file overrides any static mapping in the platform's config.yaml for
+# this specific repo.
+
+# app_name is the ArgoCD application base name.
+# pgate appends "-<env>" when env_apps is not specified.
+app_name: payment-service
+
+# env_apps maps each environment to an explicit ArgoCD application name.
+# Define this when your app names do not follow the "<app_name>-<env>" pattern.
+env_apps:
+  dev:     payment-service-dev
+  staging: payment-service-staging
+  prod:    payment-service-prod

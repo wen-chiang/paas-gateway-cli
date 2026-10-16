@@ -1,0 +1,65 @@
+# pgate global configuration
+# Place this file at:
+#   ~/.config/pgate/config.yaml   (user-level, applies to all repos)
+#   ./config.yaml                 (project root, for local development)
+
+# ── GitHub connection ─────────────────────────────────────────────────────────
+github:
+  base_url: "https://github.sampleOrg.com"
+
+# ── Policy check behaviour ────────────────────────────────────────────────────
+# continue_on_fail: false (default) — gate stops immediately on this check failing
+# continue_on_fail: true            — failure is recorded but next check still runs
+policy:
+  checks:
+    repo_role:
+      continue_on_fail: false   # must have write access — hard stop
+    ownership:
+      continue_on_fail: false   # must be in CODEOWNERS — hard stop
+    security_scan:
+      continue_on_fail: false   # no critical CVEs — hard stop
+    servicenow_cr:
+      continue_on_fail: true    # CR check: warn and continue (stub phase)
+    env_promotion:
+      continue_on_fail: false   # must follow dev→staging→prod order — hard stop
+
+# ── Environment promotion order ───────────────────────────────────────────────
+environments:
+  order:
+    - dev
+    - trial
+    - prod
+
+# ── Profiles ──────────────────────────────────────────────────────────────────
+# Each profile maps to an environment (matched by --env flag).
+# Each profile can have any number of tool entries (argocd, vault, grafana, etc.).
+# Future: replace with a fetch from a central config server at startup.
+#
+profiles:
+  # ArgoCD uses OIDC (Dex) — no username/password here.
+  # pgate opens a browser for the user to authenticate via OIDC after policy checks pass.
+  # The user's own OIDC identity (id_token) is used as the ArgoCD auth token.
+  dev:
+    argocd:
+      server_url:      "https://argocd.sampleOrg.local"
+      tls_skip_verify: true           # self-signed cert on local k3d cluster
+      grpc_web:        true           # required when ArgoCD is behind an ingress/proxy
+
+  # trial:
+  #   argocd:
+  #     server_url: "https://argocd.trial.sampleOrg.com"
+  #     tls_skip_verify: false
+
+  # prod:
+  #   argocd:
+  #     server_url: "https://argocd.prod.sampleOrg.com"
+  #     tls_skip_verify: false
+
+# ── Static repo → ArgoCD app mapping ─────────────────────────────────────────
+# Fallback when a repo has no .pgate.yaml. Per-repo .pgate.yaml takes priority.
+repos:
+  repoOrg/otel-op-springboot-app:
+    env_apps:
+      dev:   otel-op-springboot-app-dev
+      trial: otel-op-springboot-app-trial
+      prod:  otel-op-springboot-app-prod

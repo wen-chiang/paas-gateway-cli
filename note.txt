@@ -1,0 +1,22 @@
+argocd app create -f
+
+# 1. Register the app
+./pgate argocd run \
+  --repo repoOrg/otel-op-springboot-app \
+  --env dev \
+  --branch develop \
+  -- app create -f target-application.yaml
+
+# 2. Deploy it
+./pgate argocd run \
+  --repo repoOrg/otel-op-springboot-app \
+  --env dev \
+  --branch develop \
+  -- app sync otel-op-springboot-app-dev
+
+
+  kubectl label namespace demo argocd.argoproj.io/managed-by=argocd 
+
+
+export PGATE_GITHUB_USER=your-username
+export PGATE_GITHUB_TOKEN=your-personal-access-token
